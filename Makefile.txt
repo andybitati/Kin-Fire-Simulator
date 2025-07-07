@@ -1,0 +1,24 @@
+﻿# Nom du compilateur
+CXX = g++
+
+# Options de compilation:
+# - std=c++11 : on utilise le standard C++11
+# - Wall : active tous les warnings
+CXXFLAGS = -std=c++11 - Wall
+
+# Nom de l'exécutable généré
+TARGET = fire_simulator
+
+# Fichiers sources(ajustables si d'autres fichiers sont ajoutés)
+SRC = src / Main.cpp
+
+# Règle par défaut exécutée avec 'make'
+all: $(TARGET)
+
+# Compilation de l'exécutable
+$(TARGET): $(SRC)
+	$(CXX) $(CXXFLAGS) - o $(TARGET) $(SRC)
+
+# Commande pour nettoyer les fichiers compilés
+clean:
+	rm - f $(TARGET)
