@@ -1,91 +1,60 @@
 ﻿#ifndef FORET_H
 #define FORET_H
 
-#include <vector>     // Pour utiliser std::vector
-#include <random>     // Pour la génération aléatoire
-#include <iostream>   // Pour l'affichage avec std::cout
+// Inclusion des bibliothèques nécessaires
+#include <vector>           // Pour utiliser les tableaux 2D dynamiques
+#include <random>           // Pour la génération aléatoire (propagation du feu)
+#include <iostream>         // Pour l'affichage de la forêt
+#include <omp.h>            // Pour la parallélisation avec OpenMP
 
-// ───────────────────────────────────────────────
-// Enumération représentant les différents états
-// qu'une cellule de la forêt peut avoir.
-// ───────────────────────────────────────────────
+// Enumération des états possibles d'une cellule dans la forêt
 enum CellState {
-    TREE,    // Arbre sain (non en feu)
-    FIRE,    // Arbre en feu (sera utilisé plus tard)
-    ASH,     // Cendre (après combustion)
-    EMPTY    // Espace vide (pas d'arbre)
+    TREE,   // Arbre sain
+    FIRE,   // Arbre en feu
+    ASH,    // Arbre réduit en cendre
+    EMPTY   // Cellule vide (sans arbre)
 };
 
-// ───────────────────────────────────────────────
-// Classe Forest : représente une grille 2D
-// modélisant une forêt dans laquelle le feu
-// peut se propager. Cette version contient
-// seulement l'initialisation de base et
-// l'affichage.
-// ───────────────────────────────────────────────
+// Classe représentant la forêt
 class Forest {
 private:
-    int rows; // Nombre de lignes de la grille
-    int cols; // Nombre de colonnes de la grille
+    int rows;   // Nombre de lignes de la forêt
+    int cols;   // Nombre de colonnes de la forêt
 
-    // Grille principale représentant l'état de chaque cellule
-    std::vector<std::vector<CellState>> grid;
+    // Grille actuelle représentant l’état de chaque cellule (forêt actuelle)
+    std::vector<std::vector<CellState>> currentGrid;
+
+    // Grille temporaire pour stocker les états futurs des cellules
+    std::vector<std::vector<CellState>> nextGrid;
+
+    double spreadProb;  // Probabilité que le feu se propage à un arbre voisin
+
+    // Générateur de nombres aléatoires pour la propagation
+    mutable std::mt19937 rng; // Générateur Mersenne Twister (mutable pour être utilisable dans les méthodes const)
+    mutable std::uniform_real_distribution<> spreadDist; // Distribution uniforme entre 0 et 1
 
 public:
-    // Constructeur : initialise une grille vide de taille rows x cols
-    Forest(int r, int c);
+    // Constructeur : initialise la forêt avec dimensions et probabilité de propagation du feu
+    Forest(int r, int c, double prob = 0.5);
 
-    // Remplit la grille avec des arbres ou des espaces vides,
-    // selon une densité donnée (entre 0.0 et 1.0)
+    // Initialise la forêt avec une certaine densité d'arbres (entre 0 et 1)
     void initialize(double treeDensity);
 
-    // Affiche la grille dans la console avec des symboles :
-    // T = arbre, F = feu, C = cendre, . = vide
+    // Allume un feu à une position donnée (x, y)
+    void ignite(int x, int y);
+
+    // Simule une étape de propagation du feu
+    void simulateStep();
+
+    // Affiche la grille actuelle de la forêt dans la console
     void display() const;
+
+private:
+    // Met à jour l’état d’une cellule donnée (selon les voisins et la probabilité)
+    CellState updateCell(int x, int y) const;
+
+    // Vérifie si la cellule a un voisin en feu (nécessaire pour propager le feu)
+    bool hasBurningNeighbor(int x, int y) const;
 };
 
-#endif // FOREST_H
-
-// ───────────────────────────────────────────────
-// Implémentation des méthodes (directement ici
-// pour simplification, mais peut être déplacée
-// dans forest.cpp plus tard)
-// ───────────────────────────────────────────────
-
-Forest::Forest(int r, int c) : rows(r), cols(c), grid(r, std::vector<CellState>(c, EMPTY)) {
-    // Toutes les cellules sont initialisées à "EMPTY" (vide)
-}
-
-void Forest::initialize(double treeDensity) {
-    // Générateur de nombres aléatoires basé sur le matériel (bon pour simulation)
-    std::random_device rd;
-    std::mt19937 gen(rd());  // Mersenne Twister (pseudo-aléatoire)
-    std::uniform_real_distribution<> dis(0.0, 1.0); // Distribution [0.0, 1.0)
-
-    // Parcours de toute la grille pour remplir chaque cellule
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            // Si la valeur aléatoire < densité d'arbre, on place un arbre
-            // Sinon, on laisse la cellule vide
-            grid[i][j] = (dis(gen) < treeDensity) ? TREE : EMPTY;
-        }
-    }
-}
-
-void Forest::display() const {
-    // Affichage ligne par ligne
-    for (const auto& row : grid) {
-        for (CellState cell : row) {
-            // On choisit un caractère distinct pour représenter chaque état
-            char symbol;
-            switch (cell) {
-            case TREE: symbol = 'A'; break;   // Arbre sain
-            case FIRE: symbol = 'F'; break;   // En feu
-            case ASH:  symbol = 'C'; break;   // Cendre (Consumed)
-            case EMPTY: symbol = '.'; break;  // Vide
-            }
-            std::cout << symbol;
-        }
-        std::cout << "\n"; // Nouvelle ligne après chaque rangée
-    }
-}
+#endif // FORET_H
