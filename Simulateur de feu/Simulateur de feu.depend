@@ -1,0 +1,25 @@
+# depslib dependency file v1.0
+1751917580 source:c:\cours\smp&mp\tp smmp\nouveau dossier\main.cpp
+	"Foret.h"
+	"WindDirection.h"
+	<iostream>
+	<iomanip>
+	<thread>
+	<chrono>
+
+1751916774 c:\cours\smp&mp\tp smmp\nouveau dossier\foret.h
+	<vector>
+	<random>
+	<iostream>
+	<omp.h>
+	"WindDirection.h"
+
+1751916757 c:\cours\smp&mp\tp smmp\nouveau dossier\winddirection.h
+	<string>
+
+1751916795 source:c:\cours\smp&mp\tp smmp\nouveau dossier\foret.cpp
+	"Foret.h"
+
+1740933562 source:c:\cours\smp&mp\tp smmp\nouveau dossier\simulateur de feu\main.cpp
+	<iostream>
+
